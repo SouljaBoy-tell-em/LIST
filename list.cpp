@@ -9,6 +9,16 @@ enum errors {
 };
 
 
+#define RATIOQUEUECOEFFICIENT 2
+#define CHECK_ERROR(condition, message_error) 			  \
+            do {                                          \
+               if  (condition) {                          \
+                   printf ("%s", message_error);          \
+                   return ERROR_ON;                       \
+               }                                          \
+            } while(false)
+
+
 typedef int Elem_t;
 typedef struct queue {
 
@@ -19,23 +29,15 @@ typedef struct queue {
 	int 	 tail;
 	int 	 size;
 	int 	 capacity;
-	int 	 free;
 } Queue;
 
 
 void startInitialize (Queue * queue);
-int ListCreator (Queue * queue, int capacity);
-void ListPush (Queue * sp, int indexArgument, Elem_t argument);
+int  ListCreator (Queue * queue, int capacity);
+bool ListPush (Queue * sp, int indexArgument, Elem_t argument);
+bool ListResize (Queue * queue);
 void shift (Queue * queue);
-
-
-#define CHECK_ERROR(condition, message_error) 			  \
-            do {                                          \
-               if  (condition) {                          \
-                   printf ("%s", message_error);          \
-                   return ERROR_ON;                       \
-               }                                          \
-            } while(false)
+void UninitializeElements (Queue * queue);
 
 
 int main (void) {
@@ -47,22 +49,11 @@ int main (void) {
 	ListPush (&queue, 7, 229);
 	ListPush (&queue, 4, 230);
 	ListPush (&queue, 6, 231);
-	ListPush (&queue, 3, 232);
-	//ListPush (&queue, 6, 233);
+	ListPush (&queue, 6, 232);
+	ListPush (&queue, 8, 233);
 
-	printf ("data: ");
-	for (int i = 0; i < queue.capacity; i++)
-		printf ("%5d ", queue.data[i]);
-	printf ("\nnext: ");
-	for (int i = 0; i < queue.capacity; i++)
-		printf ("%5d ", queue.next[i]);
-	printf ("\nprev: ");
-	for (int i = 0; i < queue.capacity; i++)
-		printf ("%5d ", queue.prev[i]);
 
-	printf ("\n\n\n");
 	shift (&queue);
-
 	printf ("\nLIST: ");
 	for (int i = 0; i < queue.size; i++)
 		printf ("%d ", queue.data[i]);
@@ -89,18 +80,17 @@ void startInitialize (Queue * queue) {
 
 		queue->prev[i] = -1;
 		queue->next[i] = -1;
+		queue->data[i] = 0;
 	}
 }
 
 
 int ListCreator (Queue * queue, int capacity) {
 
-	if (queue == NULL)	return ERROR_ON;
 
 	queue->head     		   = 		0;
 	queue->tail     		   =        0;
 	queue->size 			   = 		0;
-	queue->free = 						1;
 	queue->capacity 		   = capacity;
 
 	queue->prev = (int * ) calloc (capacity, sizeof (int)	);
@@ -116,7 +106,7 @@ int ListCreator (Queue * queue, int capacity) {
 }
 
 
-void ListPush (Queue * queue, int indexArgument, Elem_t argument) {
+bool ListPush (Queue * queue, int indexArgument, Elem_t argument) {
 
 	if (queue->size == 0) {
 
@@ -126,41 +116,51 @@ void ListPush (Queue * queue, int indexArgument, Elem_t argument) {
 		queue->prev[queue->size] =               0;
 		queue->head              =     queue->size;
 		queue->tail              =     queue->size;
-		queue->free              = queue->size + 1;
 
-		return;
+		return true;
 	}
 
 	if (queue->size == queue->capacity - 1)
+		if (!ListResize (queue))
+			return false;
 
+	if (queue->data[indexArgument] == 0) {
 
-	queue->prev[indexArgument]              =   queue->tail;
-	queue->next[indexArgument]              =             0;
-	queue->next[queue->prev[indexArgument]] = indexArgument;
-	queue->tail                             = indexArgument;
-	queue->data[indexArgument]              =      argument;
-	queue->free
-	queue->size++;
+		queue->prev[indexArgument]              =   queue->tail;
+		queue->next[indexArgument]              =             0;
+		queue->next[queue->prev[indexArgument]] = indexArgument;
+		queue->tail                             = indexArgument;
+		queue->data[indexArgument]              =      argument;
+		queue->size++;
+	}
+
+	return true;
 }
 
-/*
 
-void ListResize (Queue * queue) {
+bool ListResize (Queue * queue) {
 
-	queue->data = realloc (queue->data, )
+	queue->capacity *= RATIOQUEUECOEFFICIENT * queue->capacity;
 
+	queue->data = (Elem_t * ) realloc (queue->data, RATIOQUEUECOEFFICIENT * sizeof (Elem_t) * queue->capacity);
+	CHECK_ERROR (queue->data == NULL, "Problem with allocating memory for queue->data. (realloc)"			 );
+	queue->next = (Elem_t * ) realloc (queue->next, RATIOQUEUECOEFFICIENT * sizeof (Elem_t) * queue->capacity);
+	CHECK_ERROR (queue->next == NULL, "Problem with allocating memory for queue->next. (realloc)"    		 );
+	queue->prev = (Elem_t * ) realloc (queue->prev, RATIOQUEUECOEFFICIENT * sizeof (Elem_t) * queue->capacity);
+	CHECK_ERROR (queue->prev == NULL, "Problem with allocating memory for queue->prev. (realloc)"			 );
+
+	UninitializeElements (queue);
+
+	return true;
 }
 
-*/
 
 void shift (Queue * queue) {
 
-
-	Queue capacityQueue = {};
+	Queue capacityQueue = 													 {};
 	capacityQueue.data  = (Elem_t * ) calloc (queue->capacity, sizeof (Elem_t));
 	capacityQueue.next  = (int    * ) calloc (queue->capacity, sizeof (Elem_t));
 	capacityQueue.prev  = (int    * ) calloc (queue->capacity, sizeof (Elem_t));
-
 
 	int i = 0, index = 1;
 	for (i = 0; i < queue->size; i++) {
@@ -181,4 +181,16 @@ void shift (Queue * queue) {
 	free (capacityQueue.data);
 	free (capacityQueue.next);
 	free (capacityQueue.prev);
+}
+
+
+void UninitializeElements (Queue * queue) {
+
+	int i = 0;
+	for (i = queue->size + 1; i < queue->capacity; i++) {
+
+		queue->data[i] = -1;
+		queue->next[i] = -1;
+		queue->prev[i] = -1;
+	}
 }
