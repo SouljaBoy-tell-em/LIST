@@ -55,12 +55,17 @@ int main (void) {
 	ListPush (&queue, 5, 234);
 	ListPush (&queue, 8, 235);
 	ListPush (&queue, 11, 2232);
-	ListPop (&queue, 6);
+	ListPop (&queue, 1);
 	ListPop (&queue, 11);
+	ListPop (&queue, 3);
+	ListPush (&queue, 1, 2014);
+	//ListPop (&queue, 7);
 
 
 	printf ("\nCAPACITY: %d\n", queue.capacity);
 	printf ("SIZE: %d\n", queue.size);
+	printf ("HEAD: %d\n", queue.head);
+	printf ("TAIL: %d\n", queue.tail);
 
 	shift (&queue);
 	printf ("\nLIST: ");
@@ -148,24 +153,14 @@ bool ListPush (Queue * queue, int indexArgument, Elem_t argument) {
 
 bool ListPop (Queue * queue, int indexArgument) {
 
-	if (queue->head == indexArgument) {
-
-		queue->head    =  queue->next[indexArgument];
-		queue->data[1] = queue->data[queue->next[1]];
-		queue->next[1] = queue->next[queue->next[1]];
-		queue->prev[1] = 0;
-		return true;
-	}
+	if (queue->head == indexArgument)
+		queue->head = queue->next[indexArgument];
 
 	if (queue->tail == indexArgument) {
 
-		queue->data[indexArgument] = 0;
-		queue->next[indexArgument] = -1;
-		queue->prev[indexArgument] = -1;
 		queue->tail = queue->prev[queue->tail];
 		queue->next[queue->prev[indexArgument]] = 0;
-		queue->prev[queue->next[indexArgument]] = -1;
-		return true;
+		queue->prev[queue->next[indexArgument]] = 0;
 	}
 
 	queue->next[queue->prev[indexArgument]] = queue->next[indexArgument];
@@ -173,6 +168,7 @@ bool ListPop (Queue * queue, int indexArgument) {
 	queue->data[indexArgument] = 0;
 	queue->prev[indexArgument] = -1;
 	queue->next[indexArgument] = -1;
+	queue->size--;
 	return true;
 }
 
