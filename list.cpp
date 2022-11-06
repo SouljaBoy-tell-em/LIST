@@ -25,7 +25,8 @@ typedef struct queue {
 
 void startInitialize (Queue * queue);
 int ListCreator (Queue * queue, int capacity);
-void ListPush (Queue * sp, int index, int arg);
+void ListPush (Queue * sp, int indexArgument, Elem_t argument);
+void shift (Queue * queue);
 
 
 #define CHECK_ERROR(condition, message_error) 			  \
@@ -46,19 +47,21 @@ int main (void) {
 	ListPush (&queue, 7, 229);
 	ListPush (&queue, 4, 230);
 	ListPush (&queue, 6, 231);
-	//ListPush (&queue, 6, 232);
+	ListPush (&queue, 3, 232);
 	//ListPush (&queue, 6, 233);
 
 	printf ("data: ");
 	for (int i = 0; i < queue.capacity; i++)
-		printf ("%d ", queue.data[i]);
+		printf ("%5d ", queue.data[i]);
 	printf ("\nnext: ");
 	for (int i = 0; i < queue.capacity; i++)
-		printf ("%d ", queue.next[i]);
+		printf ("%5d ", queue.next[i]);
 	printf ("\nprev: ");
 	for (int i = 0; i < queue.capacity; i++)
-		printf ("%d ", queue.prev[i]);
+		printf ("%5d ", queue.prev[i]);
 
+	printf ("\n\n\n");
+	shift (&queue);
 
 	return 0;
 }
@@ -102,27 +105,8 @@ int ListCreator (Queue * queue, int capacity) {
 	return ERROR_OFF;
 }
 
-/*-------------------------------------------------------//
-	   0  1  2  3  4  5  6  7  8  9  10
-arr :  0  0  0  0  0  0  0  0  0  0   0
-next:  0 -1 -2 -3 -4 -5 -6 -7 -8 -9 -10 
 
-ListPush (queue, 7, 228);
-
-	   0  1  2  3  4  5  6  7  8  9  10
-arr:   0 228 0  0  0  0  0  0  0  0   0
-next:  0 -7 -2 -3 -4 -5 -6  2 -8 -9 -10 
-
-ListPush (queue, 6, 229);
-
-	   0  1  2  3  4  5  6  7  8  9  10
-arr: 228 229 0  0  0  0  0  0  0  0   0
-next:  0 -1 -1 -1 -1 -1  2  1 -1 -1  -1
-
-*/
-
-
-void ListPush (Queue * queue, int indexArgument, int argument) {
+void ListPush (Queue * queue, int indexArgument, Elem_t argument) {
 
 	if (queue->size == 0) {
 
@@ -137,12 +121,38 @@ void ListPush (Queue * queue, int indexArgument, int argument) {
 		return;
 	}
 
-	queue->prev[indexArgument] = queue->tail;
+	int save = queue->prev[indexArgument] = queue->tail;
 	queue->next[indexArgument] = 0;
 	queue->next[queue->prev[indexArgument]] = indexArgument;
 	queue->tail = indexArgument;
 	queue->data[indexArgument] = argument;
 	queue->size++;
+}
 
-	//queue->next[]
+
+void shift (Queue * queue) {
+
+	int i = 0, index = 1;
+	printf ("\nLIST: ");
+	for (i = 0; i < queue->size; i++) {
+
+		printf ("%d ", queue->data[index]);
+		index = queue->next[index];
+	}
+
+	index = 1;
+	printf ("\nNEXT: ");
+	for (i = 0; i < queue->size; i++) {
+
+		printf ("%d ", queue->next[index]);
+		index = queue->next[index];
+	}
+
+	index = 1;
+	printf ("\nPREV: ");
+	for (i = 0; i < queue->size; i++) {
+
+		printf ("%d ", queue->prev[index]);
+		index = queue->next[index];
+	}
 }
