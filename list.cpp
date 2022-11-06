@@ -44,10 +44,10 @@ int main (void) {
 	CHECK_ERROR (ListCreator (&queue, capacity), "Problem with creating QUEUE.");
 	ListPush (&queue, 5, 228);
 	ListPush (&queue, 7, 229);
-	//ListPush (&queue, 4, 230);
-	//ListPush (&queue, 6, 231);
-	//ListPush (&queue, 7, 232);
-	//ListPush (&queue, 9, 233);
+	ListPush (&queue, 4, 230);
+	ListPush (&queue, 6, 231);
+	//ListPush (&queue, 6, 232);
+	//ListPush (&queue, 6, 233);
 
 	printf ("data: ");
 	for (int i = 0; i < queue.capacity; i++)
@@ -75,7 +75,7 @@ void startInitialize (Queue * queue) {
 	for (i = 1; i < queue->capacity; i++) {
 
 		queue->prev[i] = -1;
-		queue->next[i] = -1 - i;
+		queue->next[i] = -1;
 	}
 }
 
@@ -87,7 +87,7 @@ int ListCreator (Queue * queue, int capacity) {
 	queue->head     		   = 		0;
 	queue->tail     		   =        0;
 	queue->size 			   = 		0;
-	queue->free = 		1;
+	queue->free = 						1;
 	queue->capacity 		   = capacity;
 
 	queue->prev = (int * ) calloc (capacity, sizeof (int)	);
@@ -102,7 +102,47 @@ int ListCreator (Queue * queue, int capacity) {
 	return ERROR_OFF;
 }
 
+/*-------------------------------------------------------//
+	   0  1  2  3  4  5  6  7  8  9  10
+arr :  0  0  0  0  0  0  0  0  0  0   0
+next:  0 -1 -2 -3 -4 -5 -6 -7 -8 -9 -10 
 
-void ListPush (Queue * sp, int index, int arg) {
+ListPush (queue, 7, 228);
 
+	   0  1  2  3  4  5  6  7  8  9  10
+arr:   0 228 0  0  0  0  0  0  0  0   0
+next:  0 -7 -2 -3 -4 -5 -6  2 -8 -9 -10 
+
+ListPush (queue, 6, 229);
+
+	   0  1  2  3  4  5  6  7  8  9  10
+arr: 228 229 0  0  0  0  0  0  0  0   0
+next:  0 -1 -1 -1 -1 -1  2  1 -1 -1  -1
+
+*/
+
+
+void ListPush (Queue * queue, int indexArgument, int argument) {
+
+	if (queue->size == 0) {
+
+		queue->size++;
+		queue->data[queue->size] = argument;
+		queue->next[queue->size] = 0;
+		queue->prev[queue->size] = 0;
+		queue->head = queue->size;
+		queue->tail = queue->size;
+		queue->free = queue->size + 1;
+
+		return;
+	}
+
+	queue->prev[indexArgument] = queue->tail;
+	queue->next[indexArgument] = 0;
+	queue->next[queue->prev[indexArgument]] = indexArgument;
+	queue->tail = indexArgument;
+	queue->data[indexArgument] = argument;
+	queue->size++;
+
+	//queue->next[]
 }
