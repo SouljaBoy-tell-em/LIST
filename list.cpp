@@ -63,6 +63,16 @@ int main (void) {
 	printf ("\n\n\n");
 	shift (&queue);
 
+	printf ("\nLIST: ");
+	for (int i = 0; i < queue.size; i++)
+		printf ("%d ", queue.data[i]);
+	printf ("\nNEXT: ");
+	for (int i = 0; i < queue.size; i++)
+		printf ("%d ", queue.next[i]);
+	printf ("\nPREV: ");
+	for (int i = 0; i < queue.size; i++)
+		printf ("%d ", queue.prev[i]);
+
 	return 0;
 }
 
@@ -97,7 +107,7 @@ int ListCreator (Queue * queue, int capacity) {
 	CHECK_ERROR (queue->prev == NULL, "Problem with allocating memory for queue->prev.");
 	queue->next = (int * ) calloc (capacity, sizeof (int)	);
 	CHECK_ERROR (queue->prev == NULL, "Problem with allocating memory for queue->next.");
-	queue->data = (int * ) calloc (capacity, sizeof (Elem_t));
+	queue->data = (Elem_t * ) calloc (capacity, sizeof (Elem_t));
 	CHECK_ERROR (queue->prev == NULL, "Problem with allocating memory for queue->data.");
 
 	startInitialize (queue);
@@ -111,48 +121,64 @@ void ListPush (Queue * queue, int indexArgument, Elem_t argument) {
 	if (queue->size == 0) {
 
 		queue->size++;
-		queue->data[queue->size] = argument;
-		queue->next[queue->size] = 0;
-		queue->prev[queue->size] = 0;
-		queue->head = queue->size;
-		queue->tail = queue->size;
-		queue->free = queue->size + 1;
+		queue->data[queue->size] =        argument;
+		queue->next[queue->size] =               0;
+		queue->prev[queue->size] =               0;
+		queue->head              =     queue->size;
+		queue->tail              =     queue->size;
+		queue->free              = queue->size + 1;
 
 		return;
 	}
 
-	int save = queue->prev[indexArgument] = queue->tail;
-	queue->next[indexArgument] = 0;
+	if (queue->size == queue->capacity - 1)
+
+
+	queue->prev[indexArgument]              =   queue->tail;
+	queue->next[indexArgument]              =             0;
 	queue->next[queue->prev[indexArgument]] = indexArgument;
-	queue->tail = indexArgument;
-	queue->data[indexArgument] = argument;
+	queue->tail                             = indexArgument;
+	queue->data[indexArgument]              =      argument;
+	queue->free
 	queue->size++;
 }
 
+/*
+
+void ListResize (Queue * queue) {
+
+	queue->data = realloc (queue->data, )
+
+}
+
+*/
 
 void shift (Queue * queue) {
 
+
+	Queue capacityQueue = {};
+	capacityQueue.data  = (Elem_t * ) calloc (queue->capacity, sizeof (Elem_t));
+	capacityQueue.next  = (int    * ) calloc (queue->capacity, sizeof (Elem_t));
+	capacityQueue.prev  = (int    * ) calloc (queue->capacity, sizeof (Elem_t));
+
+
 	int i = 0, index = 1;
-	printf ("\nLIST: ");
 	for (i = 0; i < queue->size; i++) {
 
-		printf ("%d ", queue->data[index]);
-		index = queue->next[index];
+		capacityQueue.data[i] = queue->data[index];
+		capacityQueue.next[i] = queue->next[index];
+		capacityQueue.prev[i] = queue->prev[index];
+		index                 = queue->next[index];
 	}
 
-	index = 1;
-	printf ("\nNEXT: ");
 	for (i = 0; i < queue->size; i++) {
 
-		printf ("%d ", queue->next[index]);
-		index = queue->next[index];
+		queue->data[i] = capacityQueue.data[i];
+		queue->next[i] = capacityQueue.next[i];
+		queue->prev[i] = capacityQueue.prev[i];
 	}
 
-	index = 1;
-	printf ("\nPREV: ");
-	for (i = 0; i < queue->size; i++) {
-
-		printf ("%d ", queue->prev[index]);
-		index = queue->next[index];
-	}
+	free (capacityQueue.data);
+	free (capacityQueue.next);
+	free (capacityQueue.prev);
 }
