@@ -34,6 +34,7 @@ typedef struct queue {
 
 void startInitialize (Queue * queue);
 int  ListCreator (Queue * queue, int capacity);
+void ListDump (Queue * queue, FILE * dumpFile);
 bool ListPop (Queue * queue, int indexArgument);
 bool ListPush (Queue * sp, int indexArgument, Elem_t argument);
 bool ListResize (Queue * queue);
@@ -46,6 +47,10 @@ int main (void) {
 	Queue queue = {};
 	int capacity = 7;
 	CHECK_ERROR (ListCreator (&queue, capacity), "Problem with creating QUEUE.");
+
+	FILE * dumpFile = dumpFile = fopen ("dumpfile.txt", "w");
+	CHECK_ERROR(dumpFile == NULL, "Problem with opening DUMPFILE.");
+
 	ListPush (&queue, 5, 228);
 	ListPush (&queue, 7, 229);
 	ListPush (&queue, 4, 230);
@@ -55,11 +60,7 @@ int main (void) {
 	ListPush (&queue, 5, 234);
 	ListPush (&queue, 8, 235);
 	ListPush (&queue, 11, 2232);
-	ListPop (&queue, 1);
 	ListPop (&queue, 11);
-	ListPop (&queue, 3);
-	ListPush (&queue, 1, 2014);
-	//ListPop (&queue, 7);
 
 
 	printf ("\nCAPACITY: %d\n", queue.capacity);
@@ -77,6 +78,8 @@ int main (void) {
 	printf ("\nPREV: ");
 	for (int i = 0; i < queue.size; i++)
 		printf ("%d ", queue.prev[i]);
+
+	ListDump (&queue, dumpFile);
 
 	return 0;
 }
@@ -117,6 +120,28 @@ int ListCreator (Queue * queue, int capacity) {
 	startInitialize (queue);
 
 	return ERROR_OFF;
+}
+
+
+void ListDump (Queue * queue, FILE * dumpFile) {
+
+	fprintf (dumpFile, "digraph G {\n");
+
+	int i = 0;
+	fprintf (dumpFile, "%d->%d\n", queue->head, queue->next[i]);
+	for (i = 0; i < queue->size; i++) 	{
+
+		if (queue->next[i+1] == 0) {
+
+			fprintf (dumpFile, "%d->%d\n", queue->next[i], queue->head);
+			break;
+		}
+
+		fprintf (dumpFile, "%d->%d\n", queue->next[i], queue->next[i + 1]);
+	}
+
+	fprintf (dumpFile, "}");
+
 }
 
 
