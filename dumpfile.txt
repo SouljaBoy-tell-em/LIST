@@ -1,0 +1,17 @@
+digraph G {
+ rankdir=LR
+block0 [shape=record, label="block 1| {data 230 | next 6 | prev 0 }"];
+block1 [shape=record, label="block 2| {data 231 | next 2 | prev 4 }"];
+block2 [shape=record, label="block 3| {data 232 | next 3 | prev 6 }"];
+block3 [shape=record, label="block 4| {data 233 | next 5 | prev 2 }"];
+block4 [shape=record, label="block 5| {data 234 | next 0 | prev 3 }"];
+block0 -> block1;
+block1 -> block2;
+block2 -> block3;
+block3 -> block4;
+block4 -> block0;
+head [shape=record, label="head"];
+tail [shape=record, label="tail"];
+head -> block0;
+tail -> block4;
+}
